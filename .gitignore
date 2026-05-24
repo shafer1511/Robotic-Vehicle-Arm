@@ -1,0 +1,9 @@
+Debug/
+Release/
+bin/
+obj/
+.settings/
+*.launch
+*.cfg
+*.local
+*.su
