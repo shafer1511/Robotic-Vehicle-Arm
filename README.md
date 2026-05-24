@@ -1,12 +1,12 @@
 # Remote-Controlled Robotic Vehicle with Integrated 4-DOF Robotic Arm
 
-An advanced embedded system featuring a Master-Slave architecture implemented on dual STM32 microcontrollers. This repository contains the complete firmware for both the handheld control unit (Master) and the mobile robot actuator platform (Slave), showcasing real-time wireless telemetry, non-blocking peripheral handling, and precise mechanical actuation.
+A dual-STM32 embedded system utilizing a Master-Slave architecture. This repository contains the firmware for both the handheld controller (Master) and the mobile robot actuator platform (Slave), featuring wireless control, non-blocking peripheral handling, and multi-servo motor synchronization.
 
+![Remote-Controlled Robotic Vehicle with Integrated 4-DOF Robotic Arm](images/completed.jpg)
 ## System Architecture
-The system operates on a decentralized Master-Slave topography:
-1. **Master (Joystick Controller):** Samples analog data from dual joysticks and digital state changes from control buttons, encrypts the telemetry into lightweight data frames, and transmits them via UART.
-2. **Slave (Vehicle Actuator):** Decodes the incoming UART command streams in real-time, translating data into multi-channel PWM signals to drive the DC propulsion motors and a 4-DOF robotic arm concurrently.
-
+The project is split into two main components:
+1. **Master (Joystick Controller):** Samples analog data from two joysticks and digital states from buttons, packages the telemetry data, and transmits it via UART.
+2. **Slave (Vehicle Actuator):** Decodes incoming UART commands in real-time, translating them into multi-channel PWM signals to control the DC drive motors and the 4-DOF robotic arm simultaneously.
 ---
 
 ## Hardware Specification & Pin Mapping
@@ -52,12 +52,23 @@ Based on the hardware configuration designed in `Vehicle.ioc`, the peripheral al
 
 ---
 
-## Key Firmware Engineering Highlights
+## Hardware & Tools
+* **Microcontroller:** STM32F103C8T6 (Cortex-M3)
+* **Wireless Communication:** HC-05 Bluetooth Module (UART interface 9600 baudrate)
+* **Power Management:** Powered by dual 18650 Li-ion batteries (7.4V).
+  * *Power Distribution:* The 7.4V rail directly powers the L298N H-Bridge for the DC motors. An **LM2596 Buck Converter** steps the voltage down to 5V to power the four RC servos, preventing voltage drops and MCU brownout resets when the motors/servos draw heavy current. A dedicated regulator provides clean 3.3V power to the STM32 and the HC-05 module.
+* **Actuators & Drivers:** RC Servos, DC Motors, L298N Dual H-Bridge Driver
+* **Inputs:** Dual Analog Joysticks, Tactile Push Buttons
+* **IDE:** STM32CubeIDE (HAL Framework)
 
-* **Software Dead-Zone Filtering:** Configured a dynamic software dead-zone threshold ($800 - 3200$) on multi-channel ADC inputs to effectively filter out hardware potentiometer drift, sensor aging, and joystick center-point noise.
-* **Non-Blocking Debouncing via EXTI ISR:** Developed an isolated asynchronous External Interrupt routine for the Gripper Hold Button. Employs non-blocking timestamp validations (`HAL_GetTick`) to bypass hardware button bouncing without stalling execution loops.
-* **Bandwidth & Packet Optimization:** Implemented state-change detection logic on telemetry parameters. Control strings are transmitted over UART *only* upon deliberate user input variation, drastically cutting down protocol bandwidth overhead.
-* **Deterministic Packet Parsing:** Engineered a non-blocking character stream accumulator over UART. Packets are parsed line-by-line via deterministic delimiter tracking (`\n`), preventing buffer overflows and processing latencies.
+---
+
+## Firmware Implementation Details
+
+* **Software Dead-Zone Filtering:** Implemented a software dead-zone ($800 - 3200$) on the multi-channel ADC inputs to filter out joystick center-point noise and hardware potentiometer drift.
+* **Non-Blocking Debouncing:** Used an External Interrupt (EXTI) for the Gripper Hold Button with `HAL_GetTick()` timestamp validation, debouncing the tactile switch without blocking the main execution loop.
+* **Data Transmission Optimization:** Added state-change detection so control strings are only sent over UART when the user actually moves the joysticks or presses a button, reducing unnecessary serial bandwidth overhead.
+* **Packet Parsing:** Implemented a non-blocking character accumulator over UART. Incoming data bytes are stored and parsed line-by-line using a newline delimiter (`\n`) to avoid buffer overflows.
 
 ---
 
