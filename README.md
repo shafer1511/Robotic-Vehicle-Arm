@@ -2,7 +2,7 @@
 
 A dual-STM32 embedded system utilizing a Master-Slave architecture. This repository contains the firmware for both the handheld controller (Master) and the mobile robot actuator platform (Slave), featuring wireless control, non-blocking peripheral handling, and multi-servo motor synchronization.
 
-![Remote-Controlled Robotic Vehicle with Integrated 4-DOF Robotic Arm](images/completed.jpg)
+![Remote-Controlled Robotic Vehicle with Integrated 4-DOF Robotic Arm](images/completed.png)
 ## System Architecture
 The project is split into two main components:
 1. **Master (Joystick Controller):** Samples analog data from two joysticks and digital states from buttons, packages the telemetry data, and transmits it via UART.
